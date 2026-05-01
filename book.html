@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remix 3 : A Practical Developer's Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0f1117;
+      --bg-card: #161b27;
+      --bg-code: #1a1f2e;
+      --bg-table-hd: #1e2538;
+      --border: #2a3148;
+      --border-light: #1e2538;
+      --text: #e2e8f0;
+      --text-muted: #8892a4;
+      --text-dim: #5a6478;
+      --accent: #7c6af7;
+      --accent-glow: rgba(124, 106, 247, 0.15);
+      --accent2: #38bdf8;
+      --accent2-glow: rgba(56, 189, 248, 0.1);
+      --green: #4ade80;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 16px;
+      padding: 0;
+    }
+
+    /* ── Layout ── */
+    .page-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 60px 32px 120px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 80px 0 56px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(124, 106, 247, 0.3);
+      border-radius: 999px;
+      padding: 4px 14px;
+      margin-bottom: 24px;
+    }
+
+    /* ── Headings ── */
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    h2 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin: 64px 0 20px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.4em;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent2);
+      margin: 36px 0 12px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Paragraphs ── */
+    p {
+      color: #c8d3e0;
+      margin-bottom: 16px;
+    }
+
+    /* ── Blockquotes ── */
+    blockquote {
+      background: var(--accent-glow);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 14px 20px;
+      margin: 20px 0;
+      color: #c8d3e0;
+      font-style: italic;
+    }
+
+    blockquote p {
+      margin: 0;
+    }
+
+    blockquote strong {
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    /* ── Inline code ── */
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.82em;
+      background: var(--bg-code);
+      color: var(--accent2);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    /* ── Code blocks ── */
+    pre {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 16px 0 24px;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    pre::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    pre code {
+      font-size: 0.875rem;
+      background: none;
+      border: none;
+      color: #a8b5d1;
+      padding: 0;
+      line-height: 1.65;
+    }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 28px;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    thead tr {
+      background: var(--bg-table-hd);
+    }
+
+    thead th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    tbody tr {
+      border-top: 1px solid var(--border-light);
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    td {
+      padding: 10px 16px;
+      color: #c8d3e0;
+      vertical-align: top;
+    }
+
+    /* ── Lists ── */
+    ul,
+    ol {
+      padding-left: 28px;
+      margin-bottom: 18px;
+    }
+
+    li {
+      color: #c8d3e0;
+      margin-bottom: 6px;
+    }
+
+    li::marker {
+      color: var(--accent);
+    }
+
+    /* ── Links ── */
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(124, 106, 247, 0.3);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    a:hover {
+      color: #a89cf9;
+      border-color: var(--accent);
+    }
+
+    /* ── HR ── */
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ── TOC ── */
+    .toc-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin: 0 0 48px;
+    }
+
+    .toc-block h2 {
+      font-size: 1rem;
+      margin: 0 0 16px;
+      border: none;
+      padding: 0;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+    }
+
+    .toc-block h2::before {
+      display: none;
+    }
+
+    .toc-block ol {
+      margin: 0;
+      padding-left: 20px;
+      column-count: 2;
+      column-gap: 32px;
+    }
+
+    .toc-block li {
+      margin-bottom: 8px;
+    }
+
+    /* ── Strong ── */
+    strong {
+      color: #e8edf4;
+      font-weight: 600;
+    }
+
+    em {
+      color: #9ba8bc;
+    }
+
+    /* ── Checklist ── */
+    ul li:has(input[type=checkbox]) {
+      list-style: none;
+      margin-left: -28px;
+      padding-left: 0;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-dim);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .page-wrap {
+        padding: 32px 20px 80px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      h2 {
+        font-size: 1.25rem;
+      }
+
+      .toc-block ol {
+        column-count: 1;
+      }
+
+      pre {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrap">
+    <div class="hero">
+      <div class="hero-badge">Living Developer Guide</div>
+      <h1>Remix 3 — A Practical Developer's Guide</h1>
+    </div>
+    <div>
+      <p>I am trying to get my head round the new remix3.</p>
+      <p>To begin with I installed the demo project installed with:</p>
+    </div>
+    <pre>npx remix@next new my-remix-app</pre>
+    <div>Then ran this prompt, it used a few tokens :)</div>
+    <blockquote>
+      <p>You are going to tutor me in how to use the new remix development methodology.
+        Write me a small book explaining how to use it, save as book.md in the project.
+        We will update as i need more detailed info, as I build my first app.</p>
+    </blockquote>
+    <div>I hope by sharing it can help you start your remix3 journey.</div>
+    <hr>
+    <div class="hero">
+      <h1>The Book</h1>
+    </div>
+    <div class="toc-block">
+      <h2>Table of Contents</h2>
+      <ol>
+        <li><a href="#1-what-is-remix-3">What Is Remix 3?</a></li>
+        <li><a href="#2-project-layout">Project Layout</a></li>
+        <li><a href="#3-routes--the-url-contract">Routes — The URL Contract</a></li>
+        <li><a href="#4-controllers--actions">Controllers &amp; Actions</a></li>
+        <li><a href="#5-middleware--server-setup">Middleware &amp; Server Setup</a></li>
+        <li><a href="#6-data-access--validation">Data Access &amp; Validation</a></li>
+        <li><a href="#7-auth--sessions">Auth &amp; Sessions</a></li>
+        <li><a href="#8-the-component-model">The Component Model</a></li>
+        <li><a href="#9-testing">Testing</a></li>
+        <li><a href="#10-common-mistakes-to-avoid">Common Mistakes to Avoid</a></li>
+        <li><a href="#11-static-sites-with-remix">Static Sites with Remix</a></li>
+        <li><a href="#12-quick-package-reference">Quick Package Reference</a></li>
+      </ol>
+    </div>
+    <hr>
+    <h2>1. What Is Remix 3?</h2>
+    <p>Remix 3 is a <strong>server-first web framework</strong> built entirely on standard Web APIs —
+      <code>Request</code>, <code>Response</code>, <code>URL</code>, <code>FormData</code>. There is no magic framework
+      runtime; everything maps to things the platform already does.
+    </p>
+    <h3>The Four Pillars</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Pillar</th>
+          <th>What it does</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Routes</strong> (<code>app/routes.ts</code>)</td>
+          <td>Declares the typed URL surface of the app</td>
+        </tr>
+        <tr>
+          <td><strong>Controllers / Actions</strong></td>
+          <td>Handles requests and returns <code>Response</code> objects</td>
+        </tr>
+        <tr>
+          <td><strong>Middleware</strong></td>
+          <td>Composes request lifecycle — sessions, auth, database</td>
+        </tr>
+        <tr>
+          <td><strong>Components</strong> (<code>remix/ui</code>)</td>
+          <td>Renders UI — <strong>not React</strong>, a different model</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Key Import Rule</h3>
+    <p>There is <strong>no top-level <code>remix</code> import</strong>. Everything comes from subpaths:</p>
+    <pre><code class="language-typescript">// ✅ Correct
+import { createRouter } from &#39;remix/fetch-router&#39;
+import { redirect } from &#39;remix/response/redirect&#39;
+import { session } from &#39;remix/session-middleware&#39;
+
+// ❌ Wrong — will break
+import { createRouter } from &#39;remix&#39;
+</code></pre>
+    <h3>The Mental Model</h3>
+    <p>Think of a Remix app as a typed pipeline:</p>
+    <pre><code>Request → Middleware Stack → Router → Controller Action → Response
+</code></pre>
+    <p>The server path must be correct <strong>before</strong> you add browser interactivity. Always make the route
+      return the right <code>Response</code> first.</p>
+    <hr>
+    <h2>2. Project Layout</h2>
+    <pre><code>my-app/
+├── app/                    ← All runtime application code
+│   ├── assets/             ← Client entrypoints, browser-owned behavior
+│   ├── controllers/        ← Route handlers and route-local UI
+│   ├── data/               ← Schema, queries, migrations, DB setup
+│   ├── middleware/         ← Auth, sessions, uploads, DB injection
+│   ├── ui/                 ← Shared cross-route UI components
+│   ├── utils/              ← Last-resort cross-layer helpers only
+│   ├── routes.ts           ← The URL contract (source of truth)
+│   └── router.ts           ← Wires routes to controllers
+├── db/                     ← Migration files and local DB files
+├── public/                 ← Static assets served as-is
+├── test/                   ← Shared helpers, fixtures, integration tests
+└── tmp/                    ← Uploads, caches, session files
+</code></pre>
+    <h3>Where Does My Code Go?</h3>
+    <p>Use this decision tree:</p>
+    <ol>
+      <li><strong>Does it belong to one route?</strong> → Put it next to that controller.</li>
+      <li><strong>Is it shared UI across routes?</strong> → <code>app/ui/</code></li>
+      <li><strong>Is it request lifecycle setup?</strong> → <code>app/middleware/</code></li>
+      <li><strong>Is it schema, queries, or DB logic?</strong> → <code>app/data/</code></li>
+      <li><strong>None of the above?</strong> → <code>app/utils/</code> as a last resort.</li>
+    </ol>
+    <h3>Anti-Patterns</h3>
+    <ul>
+      <li>❌ <code>app/lib/</code> — generic dumping ground, don&#39;t create it</li>
+      <li>❌ <code>app/components/</code> — <code>app/ui/</code> already owns this role</li>
+      <li>❌ Putting shared UI inside <code>app/controllers/</code></li>
+      <li>❌ Creating folders for simple leaf actions that don&#39;t need them</li>
+    </ul>
+    <hr>
+    <h2>3. Routes — The URL Contract</h2>
+    <p><code>app/routes.ts</code> is the <strong>single source of truth</strong> for every URL in your app. Define
+      routes here first, before writing any handlers.</p>
+    <h3>Basic Route Definition</h3>
+    <pre><code class="language-typescript">import { form, get, post, resources, route } from &#39;remix/fetch-router/routes&#39;
+
+export const routes = route({
+  home: &#39;/&#39;,                         // any method, absolute path
+  contact: form(&#39;contact&#39;),          // GET + POST pair at /contact
+  books: {
+    index: &#39;/books&#39;,
+    show: &#39;/books/:slug&#39;,
+  },
+  auth: route(&#39;auth&#39;, {             // /auth prefix for all children
+    login: form(&#39;login&#39;),           // GET /auth/login, POST /auth/login
+    logout: post(&#39;logout&#39;),         // POST /auth/logout
+  }),
+  admin: route(&#39;admin&#39;, {
+    index: get(&#39;/&#39;),
+    books: resources(&#39;books&#39;, { param: &#39;bookId&#39; }),
+  }),
+})
+</code></pre>
+    <h3>Route Builders</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Builder</th>
+          <th>HTTP</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>&#39;/&#39;</code> (string)</td>
+          <td>ANY</td>
+          <td>Matches any method</td>
+        </tr>
+        <tr>
+          <td><code>get(path)</code></td>
+          <td>GET</td>
+          <td>GET only</td>
+        </tr>
+        <tr>
+          <td><code>post(path)</code></td>
+          <td>POST</td>
+          <td>POST only</td>
+        </tr>
+        <tr>
+          <td><code>put(path)</code></td>
+          <td>PUT</td>
+          <td>PUT only</td>
+        </tr>
+        <tr>
+          <td><code>del(path)</code></td>
+          <td>DELETE</td>
+          <td>DELETE only</td>
+        </tr>
+        <tr>
+          <td><code>form(path)</code></td>
+          <td>GET + POST</td>
+          <td>Creates <code>.index</code> and <code>.action</code> leaves</td>
+        </tr>
+        <tr>
+          <td><code>resources(name)</code></td>
+          <td>CRUD</td>
+          <td>Creates <code>index</code>, <code>new</code>, <code>create</code>, <code>show</code>, <code>edit</code>,
+            <code>update</code>, <code>destroy</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Generating URLs with <code>.href()</code></h3>
+    <p>Never hand-write URLs. Use the typed <code>.href()</code> method:</p>
+    <pre><code class="language-typescript">redirect(routes.home.href())
+redirect(routes.books.show.href({ slug: &#39;my-book&#39; }))
+redirect(routes.auth.login.href())
+</code></pre>
+    <p>This means if you rename a route, every <code>.href()</code> call breaks at compile time — a good thing.</p>
+    <hr>
+    <h2>4. Controllers &amp; Actions</h2>
+    <h3>What Is a Controller?</h3>
+    <p>A controller is an object whose <code>actions</code> keys mirror the route map. It handles requests and
+      <strong>always returns a <code>Response</code></strong>.
+    </p>
+    <pre><code class="language-typescript">import type { Controller } from &#39;remix/fetch-router&#39;
+import type { AppContext } from &#39;../router.ts&#39;
+import { routes } from &#39;../routes.ts&#39;
+
+export default {
+  actions: {
+    async index({ get }) {
+      let db = get(Database)
+      let books = await db.findMany(booksTable, { orderBy: [&#39;id&#39;, &#39;asc&#39;] })
+      return render(&lt;BooksPage books={books} /&gt;)
+    },
+
+    async show({ get, params }) {
+      let db = get(Database)
+      let book = await db.findOne(booksTable, { where: { slug: params.slug } })
+      if (!book) return new Response(&#39;Not Found&#39;, { status: 404 })
+      return render(&lt;BookPage book={book} /&gt;)
+    },
+  },
+} satisfies Controller&lt;typeof routes.books, AppContext&gt;
+</code></pre>
+    <h3>What an Action Receives</h3>
+    <p>Every action handler gets a context object:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>What it gives you</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>get(Key)</code></td>
+          <td>A value set by middleware (Database, Session, Auth, FormData)</td>
+        </tr>
+        <tr>
+          <td><code>params</code></td>
+          <td>Typed URL params (e.g. <code>params.slug</code>)</td>
+        </tr>
+        <tr>
+          <td><code>url</code></td>
+          <td>The full <code>URL</code> object</td>
+        </tr>
+        <tr>
+          <td><code>request</code></td>
+          <td>The raw <code>Request</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Returning Responses</h3>
+    <p><strong>Render HTML:</strong></p>
+    <pre><code class="language-typescript">return render(&lt;MyPage data={data} /&gt;)
+</code></pre>
+    <p><strong>Redirect after a mutation (POST → Redirect → GET):</strong></p>
+    <pre><code class="language-typescript">import { redirect } from &#39;remix/response/redirect&#39;
+return redirect(routes.books.index.href(), 303)
+</code></pre>
+    <p><strong>Return an error:</strong></p>
+    <pre><code class="language-typescript">if (!book) return new Response(&#39;Not Found&#39;, { status: 404 })
+</code></pre>
+    <p><strong>Re-render a form with validation errors:</strong></p>
+    <pre><code class="language-typescript">let parsed = s.parseSafe(bookSchema, get(FormData))
+if (!parsed.success) {
+  return render(&lt;NewBookPage errors={parsed.issues} /&gt;, { status: 400 })
+}
+</code></pre>
+    <p><strong>Return JSON</strong> (for API endpoints):</p>
+    <pre><code class="language-typescript">return new Response(JSON.stringify({ results }), {
+  headers: { &#39;Content-Type&#39;: &#39;application/json; charset=utf-8&#39; },
+})
+</code></pre>
+    <h3>Registering Routes in <code>router.ts</code></h3>
+    <pre><code class="language-typescript">import { createRouter } from &#39;remix/fetch-router&#39;
+import { routes } from &#39;./routes.ts&#39;
+import booksController from &#39;./controllers/books/controller.tsx&#39;
+import homeController from &#39;./controllers/home.tsx&#39;
+
+export const router = createRouter({ middleware })
+
+router.map(routes.books, booksController)  // map = controller with actions
+router.map(routes.home, homeController)
+router.post(routes.auth.logout, logoutAction)  // single action
+</code></pre>
+    <h3>Flat vs Folder Controllers</h3>
+    <ul>
+      <li><strong>Flat file</strong> — <code>app/controllers/home.tsx</code> for simple leaf routes</li>
+      <li><strong>Folder</strong> — <code>app/controllers/books/controller.tsx</code> when a route has nested routes,
+        multiple actions, or route-local modules</li>
+    </ul>
+    <p>Promote a flat file to a folder only when it genuinely needs it.</p>
+    <hr>
+    <h2>5. Middleware &amp; Server Setup</h2>
+    <p>Middleware is a function <code>(context, next) =&gt; Response</code>. It runs in order for every request.</p>
+    <h3>The Golden Rule of Ordering</h3>
+    <blockquote>
+      <p><strong>Fast exits first, request enrichment later.</strong></p>
+    </blockquote>
+    <pre><code class="language-typescript">// Recommended order
+middleware.push(logger())          // dev only — see requests
+middleware.push(compression())     // compress responses
+middleware.push(staticFiles(&#39;./public&#39;))  // fast-exit for static files
+middleware.push(formData())        // parse request bodies
+middleware.push(methodOverride())  // allow PUT/DELETE from forms
+middleware.push(session(cookie, storage))  // session must come before auth
+middleware.push(asyncContext())    // lets helpers call getContext()
+middleware.push(loadDatabase())    // inject DB into context
+middleware.push(loadAuth())        // resolve identity
+</code></pre>
+    <h3>Built-in Middleware Catalog</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Middleware</th>
+          <th>Import</th>
+          <th>When to use</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>staticFiles(dir)</code></td>
+          <td><code>remix/static-middleware</code></td>
+          <td>Serve <code>public/</code></td>
+        </tr>
+        <tr>
+          <td><code>compression()</code></td>
+          <td><code>remix/compression-middleware</code></td>
+          <td>Compress text responses</td>
+        </tr>
+        <tr>
+          <td><code>logger()</code></td>
+          <td><code>remix/logger-middleware</code></td>
+          <td>Dev request logging</td>
+        </tr>
+        <tr>
+          <td><code>formData()</code></td>
+          <td><code>remix/form-data-middleware</code></td>
+          <td>Parse form bodies once</td>
+        </tr>
+        <tr>
+          <td><code>methodOverride()</code></td>
+          <td><code>remix/method-override-middleware</code></td>
+          <td>PUT/DELETE from HTML forms</td>
+        </tr>
+        <tr>
+          <td><code>session(cookie, storage)</code></td>
+          <td><code>remix/session-middleware</code></td>
+          <td>Cookie-backed sessions</td>
+        </tr>
+        <tr>
+          <td><code>csrf()</code></td>
+          <td><code>remix/csrf-middleware</code></td>
+          <td>CSRF protection</td>
+        </tr>
+        <tr>
+          <td><code>asyncContext()</code></td>
+          <td><code>remix/async-context-middleware</code></td>
+          <td><code>getContext()</code> in helpers</td>
+        </tr>
+        <tr>
+          <td><code>cors()</code></td>
+          <td><code>remix/cors-middleware</code></td>
+          <td>Cross-origin endpoints</td>
+        </tr>
+        <tr>
+          <td><code>auth({ schemes })</code></td>
+          <td><code>remix/auth-middleware</code></td>
+          <td>Resolve identity to context</td>
+        </tr>
+        <tr>
+          <td><code>requireAuth()</code></td>
+          <td><code>remix/auth-middleware</code></td>
+          <td>Gate a controller or action</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Writing Custom Middleware</h3>
+    <pre><code class="language-typescript">import type { Middleware } from &#39;remix/fetch-router&#39;
+import { Database } from &#39;remix/data-table&#39;
+
+export function loadDatabase(): Middleware {
+  return async (context, next) =&gt; {
+    context.set(Database, db)   // makes db available via get(Database)
+    return next()               // continue the chain
+  }
+}
+</code></pre>
+    <h3>Middleware Levels</h3>
+    <p>Middleware can be applied at three scopes:</p>
+    <pre><code class="language-typescript">// 1. Router-level — every request
+let router = createRouter({ middleware: [...] })
+
+// 2. Controller-level — all actions in the subtree
+export default {
+  middleware: [requireAuth()],
+  actions: { ... },
+} satisfies Controller&lt;typeof routes.account&gt;
+
+// 3. Action-level — single route
+router.get(routes.account, {
+  middleware: [requireAuth()],
+  handler: accountAction.handler,
+})
+</code></pre>
+    <h3>The AppContext Type</h3>
+    <p>Define a typed context so <code>get(Database)</code>, <code>get(Session)</code>, <code>get(Auth)</code> are fully
+      typed everywhere:</p>
+    <pre><code class="language-typescript">// app/router.ts
+import type { AnyParams, MiddlewareContext, WithParams } from &#39;remix/fetch-router&#39;
+
+type RootMiddleware = [
+  ReturnType&lt;typeof formData&gt;,
+  ReturnType&lt;typeof session&gt;,
+  ReturnType&lt;typeof loadDatabase&gt;,
+  ReturnType&lt;typeof loadAuth&gt;,
+]
+
+export type AppContext&lt;params extends AnyParams = AnyParams&gt; = WithParams&lt;
+  MiddlewareContext&lt;RootMiddleware&gt;,
+  params
+&gt;
+</code></pre>
+    <h3>Node Server Setup</h3>
+    <pre><code class="language-typescript">// server.ts
+import * as http from &#39;node:http&#39;
+import { createRequestListener } from &#39;remix/node-fetch-server&#39;
+import { router } from &#39;./app/router.ts&#39;
+
+let server = http.createServer(
+  createRequestListener(async (request) =&gt; {
+    try {
+      return await router.fetch(request)
+    } catch (error) {
+      console.error(error)
+      return new Response(&#39;Internal Server Error&#39;, { status: 500 })
+    }
+  }),
+)
+
+let port = Number(process.env.PORT) || 3000
+server.listen(port, () =&gt; console.log(`http://localhost:${port}`))
+</code></pre>
+    <h3>Bun Server Setup</h3>
+    <p>Bun natively speaks the Fetch API, so no adapter is needed — <code>router.fetch()</code> plugs straight into
+      <code>Bun.serve()</code>:
+    </p>
+    <pre><code class="language-typescript">// server.ts
+import { router } from &#39;./app/router.ts&#39;
+
+const port = Number(process.env.PORT) || 3000
+
+Bun.serve({
+  port,
+  async fetch(request) {
+    try {
+      return await router.fetch(request)
+    } catch (error) {
+      console.error(error)
+      return new Response(&#39;Internal Server Error&#39;, { status: 500 })
+    }
+  },
+})
+
+console.log(`http://localhost:${port}`)
+</code></pre>
+    <p>The key difference: Node needs <code>createRequestListener</code> to bridge its <code>http</code> module to the
+      Fetch API. Bun doesn&#39;t — its server handler already receives a <code>Request</code> and expects a
+      <code>Response</code> back.
+    </p>
+    <hr>
+    <h2>6. Data Access &amp; Validation</h2>
+    <h3>Defining Tables</h3>
+    <pre><code class="language-typescript">// app/data/schema.ts
+import { column as c, table } from &#39;remix/data-table&#39;
+import type { TableRow } from &#39;remix/data-table&#39;
+
+export const books = table({
+  name: &#39;books&#39;,
+  columns: {
+    id:     c.integer().primaryKey().autoIncrement(),
+    slug:   c.text().notNull().unique(),
+    title:  c.text().notNull(),
+    price:  c.decimal(10, 2).notNull(),
+  },
+})
+
+export type Book = TableRow&lt;typeof books&gt;
+</code></pre>
+    <h3>Common Column Types</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>SQL type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>c.integer()</code></td>
+          <td>INTEGER</td>
+        </tr>
+        <tr>
+          <td><code>c.text()</code></td>
+          <td>TEXT</td>
+        </tr>
+        <tr>
+          <td><code>c.boolean()</code></td>
+          <td>BOOLEAN</td>
+        </tr>
+        <tr>
+          <td><code>c.decimal(p, s)</code></td>
+          <td>DECIMAL</td>
+        </tr>
+        <tr>
+          <td><code>c.enum([...])</code></td>
+          <td>TEXT (enum)</td>
+        </tr>
+        <tr>
+          <td><code>c.uuid()</code></td>
+          <td>UUID / TEXT</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Modifiers: <code>.primaryKey()</code>, <code>.autoIncrement()</code>, <code>.notNull()</code>,
+      <code>.unique()</code>, <code>.references(table, col)</code>, <code>.default(value)</code>
+    </p>
+    <h3>Database Setup</h3>
+    <pre><code class="language-typescript">// app/data/db.ts
+import BetterSqlite3 from &#39;better-sqlite3&#39;
+import { createDatabase } from &#39;remix/data-table&#39;
+import { createSqliteDatabaseAdapter } from &#39;remix/data-table-sqlite&#39;
+
+let sqlite = new BetterSqlite3(&#39;./db/app.db&#39;)
+sqlite.pragma(&#39;foreign_keys = ON&#39;)
+export let db = createDatabase(createSqliteDatabaseAdapter(sqlite))
+</code></pre>
+    <h3>Querying</h3>
+    <pre><code class="language-typescript">let db = get(Database)
+
+let all    = await db.findMany(books, { orderBy: [&#39;id&#39;, &#39;asc&#39;] })
+let one    = await db.find(books, id)
+let bySlug = await db.findOne(books, { where: { slug: &#39;my-book&#39; } })
+let count  = await db.count(books, { where: { in_stock: true } })
+let new_   = await db.create(books, { slug: &#39;x&#39;, title: &#39;X&#39;, price: 9.99 })
+             await db.update(books, id, { title: &#39;Updated&#39; })
+             await db.delete(books, id)
+</code></pre>
+    <h3>Migrations</h3>
+    <pre><code class="language-typescript">// db/migrations/20260501120000_create_books.ts
+import { column as c, createMigration } from &#39;remix/data-table/migrations&#39;
+import { table } from &#39;remix/data-table&#39;
+
+export default createMigration({
+  async up({ schema }) {
+    let books = table({ name: &#39;books&#39;, columns: { id: c.integer().primaryKey().autoIncrement(), slug: c.text().notNull() } })
+    await schema.createTable(books)
+  },
+  async down({ schema }) {
+    await schema.dropTable(&#39;books&#39;)
+  },
+})
+</code></pre>
+    <p>Run migrations on startup:</p>
+    <pre><code class="language-typescript">import { createMigrationRunner } from &#39;remix/data-table/migrations&#39;
+import { loadMigrations } from &#39;remix/data-table/migrations/node&#39;
+
+let migrations = await loadMigrations(&#39;./db/migrations&#39;)
+await createMigrationRunner(adapter, migrations).up()
+</code></pre>
+    <h3>Input Validation</h3>
+    <p>Never trust input from forms, query strings, or external sources. Always parse first.</p>
+    <p><strong>Validating plain objects:</strong></p>
+    <pre><code class="language-typescript">import * as s from &#39;remix/data-schema&#39;
+import { email, minLength } from &#39;remix/data-schema/checks&#39;
+
+let userSchema = s.object({
+  name:  s.string().pipe(minLength(1)),
+  email: s.string().pipe(email()),
+  age:   s.optional(s.number()),
+})
+</code></pre>
+    <p><strong>Validating FormData (recommended for form actions):</strong></p>
+    <pre><code class="language-typescript">import * as s from &#39;remix/data-schema&#39;
+import * as f from &#39;remix/data-schema/form-data&#39;
+
+let bookSchema = f.object({
+  slug:  f.field(s.string().pipe(minLength(1))),
+  title: f.field(s.string().pipe(minLength(1))),
+  price: f.field(coerce.coerceNumber()),
+})
+</code></pre>
+    <p><strong>Safe parsing (returns a result, doesn&#39;t throw):</strong></p>
+    <pre><code class="language-typescript">let parsed = s.parseSafe(bookSchema, get(FormData))
+if (!parsed.success) {
+  // parsed.issues contains the errors to show the user
+  return render(&lt;NewBookPage errors={parsed.issues} /&gt;, { status: 400 })
+}
+let { slug, title } = parsed.value  // fully typed
+</code></pre>
+    <blockquote>
+      <p>Use <code>parseSafe</code> in actions. Validation failure is an <em>expected outcome</em>, not an exception.
+      </p>
+    </blockquote>
+    <hr>
+    <h2>7. Auth &amp; Sessions</h2>
+    <h3>Sessions vs Plain Cookies</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Situation</th>
+          <th>Use</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Theme, locale, dismissed banner</td>
+          <td><code>remix/cookie</code> — browser controls it</td>
+        </tr>
+        <tr>
+          <td>Login state, cart, flash messages</td>
+          <td><code>remix/session</code> — server-managed, tamper-resistant</td>
+        </tr>
+        <tr>
+          <td>Identity that survives cookie clearing</td>
+          <td>Auth provider + account in database</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Session Setup</h3>
+    <pre><code class="language-typescript">// app/middleware/session.ts
+import { createCookie } from &#39;remix/cookie&#39;
+import { createFsSessionStorage } from &#39;remix/session/fs-storage&#39;
+
+let secret = process.env.SESSION_SECRET
+if (!secret &amp;&amp; process.env.NODE_ENV !== &#39;test&#39;) {
+  throw new Error(&#39;SESSION_SECRET is required&#39;)
+}
+
+export let sessionCookie = createCookie(&#39;session&#39;, {
+  secrets: [secret ?? &#39;test-only-secret&#39;],
+  httpOnly: true,      // always
+  sameSite: &#39;Lax&#39;,    // default
+  secure: process.env.NODE_ENV === &#39;production&#39;,
+  maxAge: 2592000,     // 30 days
+})
+
+export let sessionStorage = createFsSessionStorage(&#39;./tmp/sessions&#39;)
+</code></pre>
+    <p>Wire into the middleware stack:</p>
+    <pre><code class="language-typescript">import { session } from &#39;remix/session-middleware&#39;
+middleware.push(session(sessionCookie, sessionStorage))
+</code></pre>
+    <h3>Using Sessions in Actions</h3>
+    <pre><code class="language-typescript">import { Session } from &#39;remix/session&#39;
+
+let session = get(Session)
+
+session.get(&#39;userId&#39;)                  // read
+session.set(&#39;userId&#39;, 42)              // write
+session.flash(&#39;message&#39;, &#39;Saved!&#39;)     // write-once flash
+session.unset(&#39;userId&#39;)                // remove
+session.regenerateId(true)             // rotate ID (use after login/logout)
+</code></pre>
+    <h3>Credentials Login Flow</h3>
+    <pre><code class="language-typescript">// Login action
+import { verifyCredentials, completeAuth } from &#39;remix/auth&#39;
+import { redirect } from &#39;remix/response/redirect&#39;
+
+async action(context) {
+  let user = await verifyCredentials(passwordProvider, context)
+
+  if (!user) {
+    let session = context.get(Session)
+    session.flash(&#39;error&#39;, &#39;Invalid email or password.&#39;)
+    return redirect(routes.auth.login.href())
+  }
+
+  let session = completeAuth(context)
+  session.set(&#39;auth&#39;, { userId: user.id })
+  session.regenerateId(true)
+  return redirect(routes.home.href())
+}
+</code></pre>
+    <h3>Protecting Routes</h3>
+    <pre><code class="language-typescript">import { requireAuth } from &#39;remix/auth-middleware&#39;
+
+// Protect an entire controller subtree
+export default {
+  middleware: [requireAuth()],
+  actions: { /* all actions require login */ },
+} satisfies Controller&lt;typeof routes.account&gt;
+</code></pre>
+    <pre><code class="language-typescript">// Redirect to login on failure
+import { requireAuth } from &#39;remix/auth-middleware&#39;
+import { redirect } from &#39;remix/response/redirect&#39;
+
+export function requireAuthRedirect() {
+  return requireAuth({
+    onFailure(context) {
+      let returnTo = encodeURIComponent(context.url.pathname)
+      return redirect(routes.auth.login.href() + `?returnTo=${returnTo}`, 303)
+    },
+  })
+}
+</code></pre>
+    <hr>
+    <h2>8. The Component Model</h2>
+    <blockquote>
+      <p>⚠️ <strong>Remix Component is not React.</strong> Do not reach for hooks. The model is different.</p>
+    </blockquote>
+    <h3>The Two Phases</h3>
+    <p>Every Remix component is a function that runs <strong>once</strong> (setup) and returns a render function that
+      runs on every update. This is the biggest mental shift from React.</p>
+    <pre><code class="language-typescript">import { on, type Handle } from &#39;remix/ui&#39;
+
+function Counter(handle: Handle&lt;{ initialCount?: number; label: string }&gt;) {
+  // === SETUP PHASE — runs once when the component mounts ===
+  let count = handle.props.initialCount ?? 0
+
+  // === RENDER PHASE — this function runs on every update ===
+  return () =&gt; (
+    &lt;button
+      mix={on(&#39;click&#39;, () =&gt; {
+        count++
+        handle.update()   // schedule a re-render
+      })}
+    &gt;
+      {handle.props.label}: {count}
+    &lt;/button&gt;
+  )
+}
+</code></pre>
+    <h3>Key Rules</h3>
+    <ul>
+      <li>State lives in <strong>setup-scope variables</strong>, not a state hook.</li>
+      <li>Read props as <code>handle.props.name</code> (not destructured at setup — values change between renders).</li>
+      <li>Call <code>handle.update()</code> to schedule a re-render after state changes.</li>
+      <li>Do DOM work in <strong>event handlers</strong> or <code>handle.queueTask(...)</code>, not in render.</li>
+      <li>Derived values (computed from state) go inside the <strong>render function</strong>.</li>
+    </ul>
+    <hr>
+    <h3>React → Remix: Side-by-Side Examples</h3>
+    <h4><code>useState</code> → setup-scope variable</h4>
+    <p>React:</p>
+    <pre><code class="language-tsx">function Counter() {
+  const [count, setCount] = useState(0)
+  return &lt;button onClick={() =&gt; setCount(c =&gt; c + 1)}&gt;{count}&lt;/button&gt;
+}
+</code></pre>
+    <p>Remix:</p>
+    <pre><code class="language-tsx">function Counter(handle: Handle) {
+  let count = 0   // plain variable, lives in setup scope
+
+  return () =&gt; (
+    &lt;button mix={on(&#39;click&#39;, () =&gt; { count++; handle.update() })}&gt;
+      {count}
+    &lt;/button&gt;
+  )
+}
+</code></pre>
+    <blockquote>
+      <p>There is no <code>setState</code>. Mutate the variable directly, then call <code>handle.update()</code>.</p>
+    </blockquote>
+    <hr>
+    <h4><code>useEffect</code> (on mount) → setup body</h4>
+    <p>React:</p>
+    <pre><code class="language-tsx">function Logger() {
+  useEffect(() =&gt; {
+    console.log(&#39;mounted&#39;)
+    return () =&gt; console.log(&#39;unmounted&#39;)
+  }, [])
+  return &lt;div&gt;Hello&lt;/div&gt;
+}
+</code></pre>
+    <p>Remix:</p>
+    <pre><code class="language-tsx">function Logger(handle: Handle) {
+  // Setup body runs once — this IS your mount effect
+  console.log(&#39;mounted&#39;)
+  handle.signal.addEventListener(&#39;abort&#39;, () =&gt; console.log(&#39;unmounted&#39;))
+
+  return () =&gt; &lt;div&gt;Hello&lt;/div&gt;
+}
+</code></pre>
+    <blockquote>
+      <p>The setup body replaces <code>useEffect(() =&gt; ..., [])</code>. Cleanup goes on <code>handle.signal</code>.
+      </p>
+    </blockquote>
+    <hr>
+    <h4><code>useEffect</code> (on dependency change) → check inside render + <code>queueTask</code></h4>
+    <p>React:</p>
+    <pre><code class="language-tsx">function UserCard({ userId }: { userId: number }) {
+  const [user, setUser] = useState(null)
+
+  useEffect(() =&gt; {
+    let cancelled = false
+    fetch(`/api/users/${userId}`)
+      .then(r =&gt; r.json())
+      .then(data =&gt; { if (!cancelled) setUser(data) })
+    return () =&gt; { cancelled = true }
+  }, [userId])
+
+  return &lt;div&gt;{user?.name ?? &#39;Loading...&#39;}&lt;/div&gt;
+}
+</code></pre>
+    <p>Remix:</p>
+    <pre><code class="language-tsx">function UserCard(handle: Handle&lt;{ userId: number }&gt;) {
+  let user: any = null
+  let lastUserId: number | null = null
+
+  return () =&gt; {
+    // Detect the dependency change inside render
+    if (lastUserId !== handle.props.userId) {
+      lastUserId = handle.props.userId
+      user = null
+
+      handle.queueTask(async (signal) =&gt; {
+        let res = await fetch(`/api/users/${handle.props.userId}`, { signal })
+        let data = await res.json()
+        if (signal.aborted) return
+        user = data
+        handle.update()
+      })
+    }
+
+    return &lt;div&gt;{user?.name ?? &#39;Loading...&#39;}&lt;/div&gt;
+  }
+}
+</code></pre>
+    <blockquote>
+      <p><code>queueTask</code> receives an <code>AbortSignal</code> that cancels automatically on re-render or unmount
+        — no manual <code>cancelled</code> flag needed.</p>
+    </blockquote>
+    <hr>
+    <h4><code>useRef</code> → plain setup-scope variable</h4>
+    <p>React:</p>
+    <pre><code class="language-tsx">function InputFocus() {
+  const inputRef = useRef&lt;HTMLInputElement&gt;(null)
+  return &lt;input ref={inputRef} onFocus={() =&gt; inputRef.current?.select()} /&gt;
+}
+</code></pre>
+    <p>Remix:</p>
+    <pre><code class="language-tsx">import { ref, on, type Handle } from &#39;remix/ui&#39;
+
+function InputFocus(handle: Handle) {
+  let inputEl: HTMLInputElement | null = null
+
+  return () =&gt; (
+    &lt;input
+      mix={[
+        ref((el) =&gt; { inputEl = el as HTMLInputElement }),
+        on(&#39;focus&#39;, () =&gt; inputEl?.select()),
+      ]}
+    /&gt;
+  )
+}
+</code></pre>
+    <blockquote>
+      <p>Use <code>ref(callback)</code> from <code>remix/ui</code> to capture DOM elements. It&#39;s a mixin, not a
+        hook.</p>
+    </blockquote>
+    <hr>
+    <h4><code>useContext</code> → <code>handle.context.get(Provider)</code></h4>
+    <p>React:</p>
+    <pre><code class="language-tsx">const ThemeContext = createContext(&#39;light&#39;)
+
+function ThemedButton() {
+  const theme = useContext(ThemeContext)
+  return &lt;button className={theme}&gt;Click&lt;/button&gt;
+}
+</code></pre>
+    <p>Remix:</p>
+    <pre><code class="language-tsx">function ThemeProvider(handle: Handle&lt;{ children?: RemixNode }&gt;) {
+  let theme: &#39;light&#39; | &#39;dark&#39; = &#39;light&#39;
+  handle.context.set({ theme })
+
+  return () =&gt; (
+    &lt;div&gt;
+      &lt;button mix={on(&#39;click&#39;, () =&gt; {
+        theme = theme === &#39;light&#39; ? &#39;dark&#39; : &#39;light&#39;
+        handle.context.set({ theme })
+        handle.update()
+      })}&gt;Toggle&lt;/button&gt;
+      {handle.props.children}
+    &lt;/div&gt;
+  )
+}
+
+function ThemedButton(handle: Handle) {
+  return () =&gt; {
+    let { theme } = handle.context.get(ThemeProvider)
+    return &lt;button class={theme}&gt;Click&lt;/button&gt;
+  }
+}
+</code></pre>
+    <blockquote>
+      <p><code>handle.context.set()</code> does <strong>not</strong> trigger updates automatically — call
+        <code>handle.update()</code> after setting.
+      </p>
+    </blockquote>
+    <hr>
+    <h4><code>useMemo</code> → derive in render, no hook needed</h4>
+    <p>React:</p>
+    <pre><code class="language-tsx">function FilteredList({ items, filter }: Props) {
+  const filtered = useMemo(
+    () =&gt; items.filter(i =&gt; i.includes(filter)),
+    [items, filter]
+  )
+  return &lt;ul&gt;{filtered.map(i =&gt; &lt;li key={i}&gt;{i}&lt;/li&gt;)}&lt;/ul&gt;
+}
+</code></pre>
+    <p>Remix:</p>
+    <pre><code class="language-tsx">function FilteredList(handle: Handle&lt;{ items: string[]; filter: string }&gt;) {
+  return () =&gt; {
+    // Derive directly in render — no memoization hook needed
+    let filtered = handle.props.items.filter(i =&gt;
+      i.includes(handle.props.filter)
+    )
+    return &lt;ul&gt;{filtered.map(i =&gt; &lt;li&gt;{i}&lt;/li&gt;)}&lt;/ul&gt;
+  }
+}
+</code></pre>
+    <blockquote>
+      <p>The Remix model doesn&#39;t have the double-render issues that motivate <code>useMemo</code> in React. Derive
+        directly in the render function.</p>
+    </blockquote>
+    <hr>
+    <h4>Global event listener → <code>addEventListeners</code> with <code>handle.signal</code></h4>
+    <p>React:</p>
+    <pre><code class="language-tsx">function WindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth)
+  useEffect(() =&gt; {
+    const handler = () =&gt; setWidth(window.innerWidth)
+    window.addEventListener(&#39;resize&#39;, handler)
+    return () =&gt; window.removeEventListener(&#39;resize&#39;, handler)
+  }, [])
+  return &lt;div&gt;{width}px&lt;/div&gt;
+}
+</code></pre>
+    <p>Remix:</p>
+    <pre><code class="language-tsx">import { addEventListeners, type Handle } from &#39;remix/ui&#39;
+
+function WindowWidth(handle: Handle) {
+  let width = window.innerWidth
+
+  addEventListeners(window, handle.signal, {
+    resize() {
+      width = window.innerWidth
+      handle.update()
+    },
+  })
+
+  return () =&gt; &lt;div&gt;{width}px&lt;/div&gt;
+}
+</code></pre>
+    <blockquote>
+      <p><code>addEventListeners</code> removes the listener automatically when the component unmounts. No cleanup
+        function needed.</p>
+    </blockquote>
+    <hr>
+    <h3>The Handle API</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>API</th>
+          <th>React equivalent</th>
+          <th>What it does</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>handle.props</code></td>
+          <td>component props</td>
+          <td>Current JSX props — always up to date</td>
+        </tr>
+        <tr>
+          <td><code>handle.update()</code></td>
+          <td><code>setState(...)</code></td>
+          <td>Schedule a re-render</td>
+        </tr>
+        <tr>
+          <td><code>handle.queueTask(fn)</code></td>
+          <td><code>useEffect</code> + cleanup</td>
+          <td>Run after next render; auto-aborted on unmount</td>
+        </tr>
+        <tr>
+          <td><code>handle.signal</code></td>
+          <td><code>useEffect</code> return fn</td>
+          <td><code>AbortSignal</code> aborted when component is removed</td>
+        </tr>
+        <tr>
+          <td><code>handle.id</code></td>
+          <td><code>useId()</code></td>
+          <td>Stable unique ID per instance</td>
+        </tr>
+        <tr>
+          <td><code>handle.context.get(P)</code></td>
+          <td><code>useContext(C)</code></td>
+          <td>Read a value from an ancestor component</td>
+        </tr>
+        <tr>
+          <td><code>handle.context.set(v)</code></td>
+          <td><code>createContext</code></td>
+          <td>Provide values to descendants</td>
+        </tr>
+        <tr>
+          <td><code>handle.frame.reload()</code></td>
+          <td>—</td>
+          <td>Reload the containing <code>&lt;Frame&gt;</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>When to Use <code>clientEntry</code></h3>
+    <p>Only add browser-side hydration when the component truly needs the browser:</p>
+    <pre><code class="language-typescript">// Only when you need interactivity or browser-only APIs
+clientEntry(Counter)
+run(Counter, { label: &#39;Clicks&#39;, initialCount: 0 })
+</code></pre>
+    <p><strong>Server-rendered output is the default.</strong> Don&#39;t add <code>clientEntry</code> before the server
+      route is correct.</p>
+    <hr>
+    <h2>9. Testing</h2>
+    <h3>The Two Test Shapes</h3>
+    <ol>
+      <li><strong>Router / server tests</strong> — drive the router with <code>router.fetch(new Request(...))</code>,
+        assert on the <code>Response</code>.</li>
+      <li><strong>Component tests</strong> — render into a real DOM, interact, assert.</li>
+    </ol>
+    <p>Prefer router tests. Most behavior is HTTP behavior.</p>
+    <h3>Router Test Example</h3>
+    <pre><code class="language-typescript">import * as assert from &#39;remix/assert&#39;
+import { describe, it } from &#39;remix/test&#39;
+import { createBookstoreRouter } from &#39;../app/router.ts&#39;
+import { routes } from &#39;../app/routes.ts&#39;
+
+describe(&#39;books index&#39;, () =&gt; {
+  it(&#39;returns 200 with a list of books&#39;, async () =&gt; {
+    let router = createBookstoreRouter()
+    let response = await router.fetch(
+      new Request(&#39;http://localhost&#39; + routes.books.index.href())
+    )
+
+    assert.equal(response.status, 200)
+    assert.match(await response.text(), /My Book Title/)
+  })
+})
+</code></pre>
+    <p><strong>Key practices:</strong></p>
+    <ul>
+      <li>Build a <strong>fresh router per test</strong> — keeps sessions, storage, and DB state isolated.</li>
+      <li>Always use <code>routes.name.href()</code> — never hand-write URLs in tests.</li>
+      <li>For auth scenarios, inject <code>createMemorySessionStorage()</code> and a test cookie.</li>
+    </ul>
+    <h3>Component Test Example</h3>
+    <pre><code class="language-typescript">import * as assert from &#39;remix/assert&#39;
+import { render } from &#39;remix/ui/test&#39;
+
+let result = render(&lt;Counter label=&quot;Clicks&quot; /&gt;)
+
+let button = result.$(&#39;button&#39;)!
+await result.act(() =&gt; button.click())
+
+assert.match(result.container.textContent ?? &#39;&#39;, /1/)
+result.cleanup()
+</code></pre>
+    <h3>Test Runner Config (<code>remix-test.config.ts</code>)</h3>
+    <pre><code class="language-typescript">export default {
+  glob: {
+    test: &#39;**/*.test{,.e2e}.{ts,tsx}&#39;,
+    exclude: &#39;node_modules/**&#39;,
+  },
+  coverage: {
+    dir: &#39;.coverage&#39;,
+    include: [&#39;app/**/*.{ts,tsx}&#39;],
+    statements: 80,
+    lines: 80,
+  },
+}
+</code></pre>
+    <p>Run tests: <code>remix test</code> | With coverage: <code>remix test --coverage</code></p>
+    <hr>
+    <h2>10. Common Mistakes to Avoid</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>❌ Mistake</th>
+          <th>✅ Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>import { x } from &#39;remix&#39;</code></td>
+          <td>Always import from subpaths: <code>remix/fetch-router</code></td>
+        </tr>
+        <tr>
+          <td>Adding <code>clientEntry</code> before server route works</td>
+          <td>Make the server route return the right Response first</td>
+        </tr>
+        <tr>
+          <td>Treating Remix Component like React (hooks, implicit rerender)</td>
+          <td>Use setup-scope state + <code>handle.update()</code></td>
+        </tr>
+        <tr>
+          <td>Passing functions or class instances into <code>clientEntry</code> props</td>
+          <td>Only serializable values allowed</td>
+        </tr>
+        <tr>
+          <td>Calling <code>getContext()</code> without <code>asyncContext()</code> in the stack</td>
+          <td>Add <code>asyncContext()</code> middleware before any code that calls it</td>
+        </tr>
+        <tr>
+          <td>Trusting raw <code>FormData</code>, params, or cookies</td>
+          <td>Parse and validate at the boundary with <code>data-schema</code></td>
+        </tr>
+        <tr>
+          <td>Throwing custom errors for validation/not-found</td>
+          <td>Return a <code>Response</code> — expected outcomes are return values, not exceptions</td>
+        </tr>
+        <tr>
+          <td>Using <code>createCookie</code> for login state</td>
+          <td>Use <code>remix/session</code> — it&#39;s tamper-resistant</td>
+        </tr>
+        <tr>
+          <td>Building JSON-only mutation endpoints</td>
+          <td>Use redirect-after-POST with a normal form action</td>
+        </tr>
+        <tr>
+          <td>Skipping resource-level authorization after <code>requireAuth</code></td>
+          <td>Auth ≠ Authorization. Still check ownership inside handlers</td>
+        </tr>
+        <tr>
+          <td>Dumping shared code into <code>utils.ts</code> / <code>helpers.ts</code></td>
+          <td>Find the real owner: <code>app/middleware/</code>, <code>app/data/</code>, <code>app/ui/</code></td>
+        </tr>
+        <tr>
+          <td>Writing only component tests for route behavior</td>
+          <td>Route behavior = router test, not component test</td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <h2>11. Static Sites with Remix</h2>
+    <p>Remix is server-first, but nothing stops you from pre-rendering routes to plain HTML files at build time and
+      serving them from a CDN or static host (Nginx, GitHub Pages, Netlify, etc.). The approach is straightforward: spin
+      up the router, fetch each route as if it were a real request, and write the response body to disk.</p>
+    <h3>The Core Idea</h3>
+    <p>Because a Remix route handler is just <code>(Request) =&gt; Promise&lt;Response&gt;</code>, you can call it from
+      a build script without running a real HTTP server:</p>
+    <pre><code class="language-typescript">// scripts/build-static.ts
+import { router } from &#39;../app/router.ts&#39;
+import { routes } from &#39;../app/routes.ts&#39;
+import { mkdir, writeFile } from &#39;node:fs/promises&#39;
+import { join } from &#39;node:path&#39;
+
+const OUT_DIR = &#39;./dist&#39;
+
+async function renderRoute(path: string, filename: string) {
+  let request = new Request(`http://localhost${path}`)
+  let response = await router.fetch(request)
+
+  if (!response.ok) {
+    console.warn(`⚠️  ${path} → ${response.status}`)
+    return
+  }
+
+  let html = await response.text()
+  let outPath = join(OUT_DIR, filename)
+  await mkdir(join(OUT_DIR, filename, &#39;..&#39;), { recursive: true })
+  await writeFile(outPath, html, &#39;utf8&#39;)
+  console.log(`✓  ${path} → ${outPath}`)
+}
+
+await renderRoute(routes.home.href(),        &#39;index.html&#39;)
+await renderRoute(routes.about.href(),       &#39;about/index.html&#39;)
+await renderRoute(routes.contact.href(),     &#39;contact/index.html&#39;)
+</code></pre>
+    <p>Run with:</p>
+    <pre><code class="language-bash">npx tsx scripts/build-static.ts
+</code></pre>
+    <h3>Pre-rendering Dynamic Routes</h3>
+    <p>For routes with params (e.g. <code>/books/:slug</code>), fetch the list of slugs from your database first, then
+      loop:</p>
+    <pre><code class="language-typescript">import { db } from &#39;../app/data/db.ts&#39;
+import { books } from &#39;../app/data/schema.ts&#39;
+
+let allBooks = await db.findMany(books, { orderBy: [&#39;slug&#39;, &#39;asc&#39;] })
+
+for (let book of allBooks) {
+  let path = routes.books.show.href({ slug: book.slug })
+  await renderRoute(path, `books/${book.slug}/index.html`)
+}
+</code></pre>
+    <h3>Copying Static Assets</h3>
+    <p>Static assets in <code>public/</code> can be copied as-is:</p>
+    <pre><code class="language-typescript">import { cp } from &#39;node:fs/promises&#39;
+await cp(&#39;./public&#39;, OUT_DIR, { recursive: true })
+</code></pre>
+    <h3>Handling Data at Build Time vs Runtime</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Approach</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Content rarely changes (blog, docs)</td>
+          <td>Pre-render at build time</td>
+        </tr>
+        <tr>
+          <td>Content changes often (e-commerce, dashboard)</td>
+          <td>Keep server-rendered, deploy normally</td>
+        </tr>
+        <tr>
+          <td>Mixed (static shell + dynamic data)</td>
+          <td>Pre-render pages, fetch data client-side via JSON endpoints</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Serving the Output</h3>
+    <p>The <code>dist/</code> folder is plain HTML — serve it anywhere:</p>
+    <pre><code class="language-bash"># Nginx — point root to ./dist
+# GitHub Pages — push dist/ to gh-pages branch
+# Netlify / Vercel — set publish directory to dist
+
+# Quick local preview
+npx serve dist
+</code></pre>
+    <h3>Limitations to Keep in Mind</h3>
+    <ul>
+      <li><strong>Form actions (POST) don&#39;t work</strong> on a static host. Pages with forms need a real server or a
+        third-party form service.</li>
+      <li><strong>Session and auth</strong> are server concepts. Static output is always public/unauthenticated.</li>
+      <li><strong>Incremental builds</strong> — pre-rendering scales fine for hundreds of pages; for thousands, add
+        concurrency:</li>
+    </ul>
+    <pre><code class="language-typescript">import { cpus } from &#39;node:os&#39;
+import pLimit from &#39;p-limit&#39;    // npm i p-limit
+
+const limit = pLimit(cpus().length)
+await Promise.all(allBooks.map(book =&gt;
+  limit(() =&gt; renderRoute(
+    routes.books.show.href({ slug: book.slug }),
+    `books/${book.slug}/index.html`
+  ))
+))
+</code></pre>
+    <hr>
+    <h2>12. Quick Package Reference</h2>
+    <h3>Routing &amp; Server</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Use for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>remix/fetch-router</code></td>
+          <td><code>createRouter</code>, controller/middleware types</td>
+        </tr>
+        <tr>
+          <td><code>remix/fetch-router/routes</code></td>
+          <td><code>route</code>, <code>get</code>, <code>post</code>, <code>form</code>, <code>resources</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/node-fetch-server</code></td>
+          <td><code>createRequestListener</code> — bridges Node <code>http</code> to router</td>
+        </tr>
+        <tr>
+          <td><code>remix/response/redirect</code></td>
+          <td><code>redirect(href, status?)</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/response/html</code></td>
+          <td><code>createHtmlResponse</code> for raw HTML strings</td>
+        </tr>
+        <tr>
+          <td><code>remix/headers</code></td>
+          <td>Typed <code>CacheControl</code>, <code>Accept</code>, <code>Cookie</code> builders</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Data &amp; Validation</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Use for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>remix/data-schema</code></td>
+          <td><code>parse</code>, <code>parseSafe</code>, schema builders</td>
+        </tr>
+        <tr>
+          <td><code>remix/data-schema/form-data</code></td>
+          <td><code>f.object</code>, <code>f.field</code> for FormData validation</td>
+        </tr>
+        <tr>
+          <td><code>remix/data-schema/checks</code></td>
+          <td><code>email</code>, <code>minLength</code>, <code>maxLength</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/data-schema/coerce</code></td>
+          <td>Coerce strings to numbers, booleans, dates</td>
+        </tr>
+        <tr>
+          <td><code>remix/data-table</code></td>
+          <td><code>table</code>, <code>column</code>, <code>createDatabase</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/data-table-sqlite</code></td>
+          <td>SQLite adapter</td>
+        </tr>
+        <tr>
+          <td><code>remix/data-table/migrations</code></td>
+          <td><code>createMigration</code>, <code>createMigrationRunner</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Auth &amp; Sessions</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Use for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>remix/session</code></td>
+          <td><code>Session</code> object — get/set/flash/unset</td>
+        </tr>
+        <tr>
+          <td><code>remix/session-middleware</code></td>
+          <td>Wire session into middleware stack</td>
+        </tr>
+        <tr>
+          <td><code>remix/session/fs-storage</code></td>
+          <td>Filesystem session storage</td>
+        </tr>
+        <tr>
+          <td><code>remix/session/memory-storage</code></td>
+          <td>In-memory (tests)</td>
+        </tr>
+        <tr>
+          <td><code>remix/cookie</code></td>
+          <td>Plain signed cookies for preferences</td>
+        </tr>
+        <tr>
+          <td><code>remix/auth</code></td>
+          <td>Credentials, OAuth, OIDC providers</td>
+        </tr>
+        <tr>
+          <td><code>remix/auth-middleware</code></td>
+          <td><code>auth()</code>, <code>requireAuth()</code>, <code>Auth</code> context key</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>UI &amp; Browser</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Use for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>remix/ui</code></td>
+          <td>Components, mixins, <code>clientEntry</code>, <code>run</code>, <code>&lt;Frame&gt;</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/ui/server</code></td>
+          <td><code>renderToStream</code>, <code>renderToString</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/ui/test</code></td>
+          <td><code>render(...)</code> for component tests</td>
+        </tr>
+        <tr>
+          <td><code>remix/ui/animation</code></td>
+          <td><code>animateEntrance</code>, <code>animateExit</code>, <code>spring</code>, <code>tween</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Middleware</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Use for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>remix/static-middleware</code></td>
+          <td><code>staticFiles(dir)</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/compression-middleware</code></td>
+          <td><code>compression()</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/form-data-middleware</code></td>
+          <td><code>formData()</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/method-override-middleware</code></td>
+          <td><code>methodOverride()</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/async-context-middleware</code></td>
+          <td><code>asyncContext()</code>, <code>getContext()</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/csrf-middleware</code></td>
+          <td><code>csrf()</code></td>
+        </tr>
+        <tr>
+          <td><code>remix/cors-middleware</code></td>
+          <td><code>cors()</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Testing</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Use for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>remix/test</code></td>
+          <td><code>describe</code>, <code>it</code>, lifecycle hooks</td>
+        </tr>
+        <tr>
+          <td><code>remix/assert</code></td>
+          <td>Assertion helpers</td>
+        </tr>
+        <tr>
+          <td><code>remix/cli</code></td>
+          <td><code>remix test</code>, <code>remix routes</code>, <code>remix doctor</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <h2>Default Workflow Checklist</h2>
+    <p>When building any feature:</p>
+    <ul>
+      <li><input disabled="" type="checkbox"> 1. <strong>Classify</strong> — does it change the URL, request lifecycle,
+        data model, auth, or just UI?</li>
+      <li><input disabled="" type="checkbox"> 2. <strong>Start from routes</strong> — add/update
+        <code>app/routes.ts</code> before writing handlers
+      </li>
+      <li><input disabled="" type="checkbox"> 3. <strong>Put code in the narrowest owner</strong> — route-local first,
+        promote only when reuse is real</li>
+      <li><input disabled="" type="checkbox"> 4. <strong>Make the server path correct first</strong> — right
+        <code>Response</code> before any <code>clientEntry</code>
+      </li>
+      <li><input disabled="" type="checkbox"> 5. <strong>Validate input at the boundary</strong> — parse FormData,
+        params, cookies before they touch business logic</li>
+      <li><input disabled="" type="checkbox"> 6. <strong>Add middleware deliberately</strong> — fast exits early,
+        enrichment later</li>
+      <li><input disabled="" type="checkbox"> 7. <strong>Hydrate only when necessary</strong> — prefer server-rendered
+        UI</li>
+      <li><input disabled="" type="checkbox"> 8. <strong>Test the narrowest meaningful layer</strong> — router tests for
+        routes, component tests for DOM behavior</li>
+      <li><input disabled="" type="checkbox"> 9. <strong>Verify</strong> — re-read route flow, confirm auth +
+        authorization, run typecheck</li>
+    </ul>
+    <hr>
+    <p><em>This book grows with you. Ask for a deeper dive on any chapter.</em></p>
+
+  </div>
+</body>
+
+</html>
