@@ -1,6 +1,7 @@
 import { createRouter } from 'remix/fetch-router'
 
 import { assets } from './assets.ts'
+import { about } from './controllers/about.tsx'
 import { auth } from './controllers/auth.tsx'
 import { home } from './controllers/home.tsx'
 import { routes } from './routes.ts'
@@ -13,4 +14,5 @@ router.get(routes.assets, async ({ request }) => {
 })
 
 router.map(routes.home, home)
+router.map(routes.about, about)
 router.map(routes.auth, auth)

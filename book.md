@@ -1,6 +1,8 @@
 # Remix 3 — A Practical Developer's Guide
 
 > A living book. Ask for more depth on any chapter and it will be expanded.
+>
+> Tested with `remix@3.0.0-beta.0`.
 
 ---
 
@@ -17,7 +19,9 @@
 9. [Testing](#9-testing)
 10. [Common Mistakes to Avoid](#10-common-mistakes-to-avoid)
 11. [Static Sites with Remix](#11-static-sites-with-remix)
-12. [Quick Package Reference](#12-quick-package-reference)
+12. [Error Handling Patterns](#12-error-handling-patterns)
+13. [Production Readiness Checklist](#13-production-readiness-checklist)
+14. [Quick Package Reference](#14-quick-package-reference)
 
 ---
 
@@ -449,7 +453,7 @@ let db = get(Database)
 let all    = await db.findMany(books, { orderBy: ['id', 'asc'] })
 let one    = await db.find(books, id)
 let bySlug = await db.findOne(books, { where: { slug: 'my-book' } })
-let count  = await db.count(books, { where: { in_stock: true } })
+let count  = await db.count(books, { where: { price: { gte: 10 } } })
 let new_   = await db.create(books, { slug: 'x', title: 'X', price: 9.99 })
              await db.update(books, id, { title: 'Updated' })
              await db.delete(books, id)
@@ -503,6 +507,8 @@ let userSchema = s.object({
 ```typescript
 import * as s from 'remix/data-schema'
 import * as f from 'remix/data-schema/form-data'
+import * as coerce from 'remix/data-schema/coerce'
+import { minLength } from 'remix/data-schema/checks'
 
 let bookSchema = f.object({
   slug:  f.field(s.string().pipe(minLength(1))),
@@ -1046,7 +1052,7 @@ Because a Remix route handler is just `(Request) => Promise<Response>`, you can 
 import { router } from '../app/router.ts'
 import { routes } from '../app/routes.ts'
 import { mkdir, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 const OUT_DIR = './dist'
 
@@ -1061,7 +1067,7 @@ async function renderRoute(path: string, filename: string) {
 
   let html = await response.text()
   let outPath = join(OUT_DIR, filename)
-  await mkdir(join(OUT_DIR, filename, '..'), { recursive: true })
+  await mkdir(dirname(outPath), { recursive: true })
   await writeFile(outPath, html, 'utf8')
   console.log(`✓  ${path} → ${outPath}`)
 }
@@ -1144,7 +1150,59 @@ await Promise.all(allBooks.map(book =>
 
 ---
 
-## 12. Quick Package Reference
+## 12. Error Handling Patterns
+
+Remix actions should treat expected business outcomes as return values, not exceptions.
+
+### Return vs Throw
+
+| Situation | Pattern |
+|---|---|
+| Validation failed | Return `render(..., { status: 400 })` |
+| Not found | Return `new Response('Not Found', { status: 404 })` |
+| Unauthorized / forbidden | Return redirect or `Response` with 401/403 |
+| Unexpected infrastructure error (DB down, bug) | Throw and let top-level server handler convert to 500 |
+
+### Keep User-Facing Errors Stable
+
+Use consistent response shapes for JSON endpoints:
+
+```typescript
+return new Response(JSON.stringify({
+  error: {
+    code: 'VALIDATION_FAILED',
+    message: 'Please fix the highlighted fields.',
+    details: parsed.issues,
+  },
+}), {
+  status: 400,
+  headers: { 'Content-Type': 'application/json; charset=utf-8' },
+})
+```
+
+### Log Once, at the Boundary
+
+Log unexpected failures in one place (your `server.ts` catch block), then return a generic 500 response. This avoids duplicate logs and prevents leaking internals to users.
+
+---
+
+## 13. Production Readiness Checklist
+
+Before shipping, verify:
+
+- [ ] `SESSION_SECRET` is set and rotated through secure deploy tooling
+- [ ] Cookies are `httpOnly`, `sameSite=Lax/Strict`, and `secure` in production
+- [ ] DB migrations run in deploy startup (and are backed up)
+- [ ] Auth checks are paired with resource-level authorization checks
+- [ ] Form boundaries validate input (`parseSafe`) and return 4xx for expected issues
+- [ ] Server has a top-level 500 fallback and centralized logging
+- [ ] Rate limiting exists for sensitive endpoints (auth, signup, reset password)
+- [ ] Health check endpoint is available for infrastructure probes
+- [ ] `npm run typecheck` and tests pass in CI before deploy
+
+---
+
+## 14. Quick Package Reference
 
 ### Routing & Server
 | Package | Use for |
