@@ -5,6 +5,7 @@ import { readState } from '../state.ts'
 describe('6. POST /update-lesson', () => {
   test('updates lesson and returns 4 students', async () => {
     const { sessionCookie, lessonCode } = readState()
+
     const { res, body } = await api('/update-lesson', {
       method: 'POST',
       cookies: { session: sessionCookie },
@@ -13,9 +14,12 @@ describe('6. POST /update-lesson', () => {
         studentNames: 'paul, dave, bill, fred',
       },
     })
+
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
+
     expect(Array.isArray(body.data?.students)).toBe(true)
+
     expect(body.data.students.length).toBe(4)
   })
 })

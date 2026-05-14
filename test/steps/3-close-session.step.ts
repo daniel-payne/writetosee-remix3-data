@@ -18,8 +18,11 @@ describe('3. POST /close-session', () => {
       method: 'POST',
       body: { email, password },
     })
+
     const newSession = extractCookie(reopen.res.headers.get('Set-Cookie'), 'session')
+
     expect(newSession).toBeTruthy()
+
     writeState({ sessionCookie: newSession! })
   })
 })

@@ -11,4 +11,6 @@ export const routes = route({
   deactivateClass: post('/deactivate-class'),
   retrieveLessons: get('/retrieve-lessons'),
   retrieveClass: get('/retrieve-class'),
+  addManuscript: post('/add-manuscript'),
+  updateManuscript: post('/update-manuscript'),
 })

@@ -28,11 +28,13 @@ const steps = [
   './test/steps/6-update-lesson.step.ts',
   './test/steps/7-activate-class.step.ts',
   './test/steps/8-retrieve-class.step.ts',
+  './test/steps/9-add-manuscript.step.ts',
+  './test/steps/10-update-manuscript.step.ts',
 ]
 
 // Initialise a fresh state file with a random test email
 const email = `test${Math.floor(Math.random() * 100000)}@etl.com`
-writeFileSync(STATE_FILE, JSON.stringify({ email, password: '123ABC', tutorCode: '', lessonCode: '', sessionCookie: '', classCookie: '' }, null, 2))
+writeFileSync(STATE_FILE, JSON.stringify({ email, password: '123ABC', tutorCode: '', lessonCode: '', sessionCookie: '', classCookie: '', manuscriptCode: '' }, null, 2))
 
 console.log(`\n🧪 Running integration suite against ${process.env.TEST_BASE_URL ?? 'http://localhost:44100'}\n`)
 

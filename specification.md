@@ -48,8 +48,6 @@ CREATE TABLE IF NOT EXISTS student (
   tutorId        INTEGER        NOT NULL,
   lessonId       INTEGER        NOT NULL,
 
-  manuscript     TEXT           NULL,
-
   data           jsonb          NOT NULL DEFAULT '{}',
   isActive       INTEGER        NOT NULL DEFAULT 1,
   
@@ -64,10 +62,14 @@ CREATE INDEX IF NOT EXISTS idx_student_lessonId ON student(lessonId);
 -- MANUSCRIPT ---------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS manuscript (
   manuscriptId   INTEGER        PRIMARY KEY,
+  manuscriptCode TEXT           NOT NULL UNIQUE DEFAULT (hex(randomblob(16))),
 
   studentId      INTEGER        NOT NULL,
 
-  manuscript     TEXT           NULL,
+  text           TEXT           NULL,
+  isActive       INTEGER        NOT NULL DEFAULT 1,
+  
+  updatedAt      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP, 
 
   FOREIGN KEY(studentId) REFERENCES student(studentId) ON DELETE CASCADE
 );

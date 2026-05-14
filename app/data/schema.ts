@@ -43,7 +43,6 @@ export const studentTable = table({
     classCode:   c.text(),
     tutorId:     c.integer().notNull(),
     lessonId:    c.integer().notNull(),
-    manuscript:  c.text(),
     data:        c.text().notNull().default('{}'),
     isActive:    c.integer().notNull().default(1),
     updatedAt:  c.text().notNull().default(''), // TIMESTAMP
@@ -56,9 +55,12 @@ export const manuscriptTable = table({
   name: 'manuscript',
   primaryKey: 'manuscriptId',
   columns: {
-    manuscriptId: c.integer().primaryKey(),
-    studentId:    c.integer().notNull(),
-    manuscript:   c.text(),
+    manuscriptId:   c.integer().primaryKey(),
+    manuscriptCode: c.text().notNull().default(''),
+    studentId:      c.integer().notNull(),
+    text:           c.text(),
+    isActive:       c.integer().notNull().default(1),
+    updatedAt:      c.text().notNull().default(''), // TIMESTAMP
   },
 })
 

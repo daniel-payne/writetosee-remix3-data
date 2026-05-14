@@ -14,6 +14,7 @@ export interface TestState {
   lessonCode: string
   sessionCookie: string
   classCookie: string
+  manuscriptCode: string
 }
 
 const defaults: TestState = {
@@ -23,6 +24,7 @@ const defaults: TestState = {
   lessonCode: '',
   sessionCookie: '',
   classCookie: '',
+  manuscriptCode: '',
 }
 
 export function readState(): TestState {
