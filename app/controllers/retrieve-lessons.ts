@@ -28,12 +28,12 @@ export const retrieveLessons: BuildAction<'GET', typeof routes.retrieveLessons> 
 
     // Build the full data structure and format it recursively once
     const responseData = formatData({
-      tutor,
+      tutor: formatData(tutor, ['passwordHash', 'sessionCode', 'isActive']),
       lessons: lessons.map((l: any) => ({
         ...l,
         students: studentsByLesson[l.lessonId] || []
       }))
-    }, ['passwordHash'])
+    })
 
     return Response.json({
       success: true,

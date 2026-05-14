@@ -61,7 +61,7 @@ export const addTutor: BuildAction<'POST', typeof routes.addTutor> = {
     return Response.json({
       success: true,
       message: 'Tutor added',
-      data: formatData(tutor, ['passwordHash'])
+      data: formatData(tutor, ['passwordHash', 'sessionCode', 'isActive'])
     })
   }
 }
