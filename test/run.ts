@@ -62,7 +62,8 @@ for (const step of steps) {
   const passLines = lines.filter(l => l.includes('(pass)') || l.includes('✓'))
   for (const line of passLines) {
     const cleaned = line.trim().replace(/^\(pass\)\s*/, '').trim()
-    console.log(`  ✓ ${cleaned}`)
+    const suffix = cleaned.includes('add-tutor') ? `  (${email})` : ''
+    console.log(`  ✓ ${cleaned}${suffix}`)
   }
 }
 

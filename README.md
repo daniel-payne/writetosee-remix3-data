@@ -48,3 +48,31 @@ Activate a class/lesson.
 #### `POST /deactivate-class`
 Deactivate a class/lesson.
 - **Response**: `{ "success": true, "message": "Class deactivated" }`
+
+## Tests
+
+To run the integration tests, use the following command:
+```bash
+bun run test:watch
+```
+
+**NOTE**: 
+These tests pollute the database, this is how I want it to run.
+During development, I want to bring the database into a specific state using these tests, and then continue to develop the application.
+
+When I am happy, I will tell the AI to regenerate the tests using the method defined in the remix3 skill.
+
+The idea is to first build the application in a "messy" way, and then clean it up using the tests.
+
+I can clean up with
+
+```bash
+bun tasks/remove-user.ts <email>
+```
+
+or 
+```bash
+bun tasks/create-tables.ts
+```
+
+
