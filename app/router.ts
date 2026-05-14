@@ -4,9 +4,9 @@ import { loadDatabase } from '@/middleware/db'
 
 import { addLesson } from '@/controllers/add-lesson'
 import { addTutor } from '@/controllers/add-tutor'
-import { activateLesson } from '@/controllers/activate-lesson'
+import { activateClass } from '@/controllers/activate-class'
 import { closeSession } from '@/controllers/close-session'
-import { deactivateLesson } from '@/controllers/deactivate-lesson'
+import { deactivateClass } from '@/controllers/deactivate-class'
 import { openSession } from '@/controllers/open-session'
 import { removeLesson } from '@/controllers/remove-lesson'
 import { retrieveLessons } from '@/controllers/retrieve-lessons'
@@ -24,6 +24,6 @@ router.map(routes.closeSession, closeSession)
 router.map(routes.addLesson, addLesson)
 router.map(routes.updateLesson, updateLesson)
 router.map(routes.removeLesson, removeLesson)
-router.map(routes.activateLesson, activateLesson)
-router.map(routes.deactivateLesson, deactivateLesson)
+router.map(routes.activateClass, activateClass)
+router.map(routes.deactivateClass, deactivateClass)
 router.map(routes.retrieveLessons, retrieveLessons)

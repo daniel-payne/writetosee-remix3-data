@@ -1,8 +1,8 @@
 import type { BuildAction } from 'remix/fetch-router'
 import { routes } from '@/routes'
 
-export const activateLesson: BuildAction<'POST', typeof routes.activateLesson> = {
+export const activateClass: BuildAction<'POST', typeof routes.activateClass> = {
   async handler() {
-    return Response.json({ success: true, message: 'Lesson activated' })
+    return Response.json({ success: true, message: 'Class activated' })
   }
 }

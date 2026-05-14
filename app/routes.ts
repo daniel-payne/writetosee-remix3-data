@@ -7,7 +7,7 @@ export const routes = route({
   addLesson: post('/add-lesson'),
   updateLesson: post('/update-lesson'),
   removeLesson: post('/remove-lesson'),
-  activateLesson: post('/activate-lesson'),
-  deactivateLesson: post('/deactivate-lesson'),
+  activateClass: post('/activate-class'),
+  deactivateClass: post('/deactivate-class'),
   retrieveLessons: get('/retrieve-lessons'),
 })

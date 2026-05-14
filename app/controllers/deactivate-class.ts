@@ -1,8 +1,8 @@
 import type { BuildAction } from 'remix/fetch-router'
 import { routes } from '@/routes'
 
-export const deactivateLesson: BuildAction<'POST', typeof routes.deactivateLesson> = {
+export const deactivateClass: BuildAction<'POST', typeof routes.deactivateClass> = {
   async handler() {
-    return Response.json({ success: true, message: 'Lesson deactivated' })
+    return Response.json({ success: true, message: 'Class deactivated' })
   }
 }
