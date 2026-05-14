@@ -1,18 +1,29 @@
 import { createRouter } from 'remix/fetch-router'
+import { asyncContext } from 'remix/async-context-middleware'
+import { loadDatabase } from '@/middleware/db'
 
-import { assets } from './assets.ts'
-import { about } from './controllers/about.tsx'
-import { auth } from './controllers/auth.tsx'
-import { home } from './controllers/home.tsx'
-import { routes } from './routes.ts'
+import { addLesson } from '@/controllers/add-lesson'
+import { addTutor } from '@/controllers/add-tutor'
+import { activateLesson } from '@/controllers/activate-lesson'
+import { closeSession } from '@/controllers/close-session'
+import { deactivateLesson } from '@/controllers/deactivate-lesson'
+import { openSession } from '@/controllers/open-session'
+import { removeLesson } from '@/controllers/remove-lesson'
+import { retrieveLessons } from '@/controllers/retrieve-lessons'
+import { updateLesson } from '@/controllers/update-lesson'
+import { routes } from '@/routes'
 
-export const router = createRouter()
 
-router.get(routes.assets, async ({ request }) => {
-  let response = await assets.fetch(request)
-  return response ?? new Response('Not Found', { status: 404 })
+export const router = createRouter({
+  middleware: [asyncContext(), loadDatabase()],
 })
 
-router.map(routes.home, home)
-router.map(routes.about, about)
-router.map(routes.auth, auth)
+router.map(routes.addTutor, addTutor)
+router.map(routes.openSession, openSession)
+router.map(routes.closeSession, closeSession)
+router.map(routes.addLesson, addLesson)
+router.map(routes.updateLesson, updateLesson)
+router.map(routes.removeLesson, removeLesson)
+router.map(routes.activateLesson, activateLesson)
+router.map(routes.deactivateLesson, deactivateLesson)
+router.map(routes.retrieveLessons, retrieveLessons)

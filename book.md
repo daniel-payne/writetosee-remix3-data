@@ -12,16 +12,19 @@
 2. [Project Layout](#2-project-layout)
 3. [Routes — The URL Contract](#3-routes--the-url-contract)
 4. [Controllers & Actions](#4-controllers--actions)
-5. [Middleware & Server Setup](#5-middleware--server-setup)
-6. [Data Access & Validation](#6-data-access--validation)
-7. [Auth & Sessions](#7-auth--sessions)
-8. [The Component Model](#8-the-component-model)
-9. [Testing](#9-testing)
-10. [Common Mistakes to Avoid](#10-common-mistakes-to-avoid)
-11. [Static Sites with Remix](#11-static-sites-with-remix)
-12. [Error Handling Patterns](#12-error-handling-patterns)
-13. [Production Readiness Checklist](#13-production-readiness-checklist)
-14. [Quick Package Reference](#14-quick-package-reference)
+5. [Rendering Pipeline](#45-rendering-pipeline-rendertsx)
+6. [Client Bridge](#46-client-bridge-appassetsentryts)
+7. [Middleware & Server Setup](#5-middleware--server-setup)
+8. [Data Access & Validation](#6-data-access--validation)
+9. [Auth & Sessions](#7-auth--sessions)
+10. [The Component Model](#8-the-component-model)
+11. [Reference UI Structure](#85-reference-ui-structure)
+12. [Testing](#9-testing)
+13. [Common Mistakes to Avoid](#10-common-mistakes-to-avoid)
+14. [Static Sites with Remix](#11-static-sites-with-remix)
+15. [Error Handling Patterns](#12-error-handling-patterns)
+16. [Production Readiness Checklist](#13-production-readiness-checklist)
+17. [Quick Package Reference](#14-quick-package-reference)
 
 ---
 
@@ -228,6 +231,144 @@ return new Response(JSON.stringify({ results }), {
 })
 ```
 
+## 5. Rendering Pipeline (`render.tsx`)
+
+In this project, controllers do not call `renderToStream` directly. They call a shared helper:
+
+```typescript
+return render(<AboutPage />, request)
+```
+
+That helper (`app/utils/render.tsx`) is the app's HTML response factory. It:
+
+- Streams UI to HTML (`renderToStream(...)`)
+- Resolves nested frames by routing frame requests back through `router.fetch(...)`
+- Forwards cookies to frame subrequests (so auth/session stay consistent)
+- Ensures `Content-Type: text/html; charset=utf-8`
+
+#### Simplified shape of the helper
+
+```typescript
+export function render(node: RemixNode, request: Request, init?: ResponseInit) {
+  let stream = renderToStream(node, {
+    frameSrc: request.url,
+    async resolveFrame(src, target) {
+      let headers = new Headers({ accept: 'text/html' })
+      let cookie = request.headers.get('cookie')
+      if (cookie) headers.set('cookie', cookie)
+      if (target) headers.set('x-remix-target', target)
+
+      let response = await router.fetch(new Request(new URL(src, request.url), { headers }))
+      return response.body ?? response.text()
+    },
+  })
+
+  let headers = new Headers(init?.headers)
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'text/html; charset=utf-8')
+  }
+
+  return new Response(stream, { ...init, headers })
+}
+```
+
+#### Controller usage example
+
+```typescript
+export const about: BuildAction<'GET', typeof routes.about> = {
+  handler({ request }) {
+    return render(<AboutPage />, request)
+  },
+}
+```
+
+The controller stays tiny, while all rendering mechanics stay centralized.
+
+---
+
+## 6. Client Bridge (`app/assets/entry.ts`)
+
+`app/assets/entry.ts` is the browser bootstrap for Remix UI. It calls `run(...)` and provides the runtime hooks the browser needs to hydrate client components and resolve frame content.
+
+```typescript
+import { run } from 'remix/ui'
+
+run({
+  async loadModule(moduleUrl, exportName) {
+    let mod = await import(moduleUrl)
+    return mod[exportName]
+  },
+  async resolveFrame(src, signal, target) {
+    let headers = new Headers({ accept: 'text/html' })
+    if (target) headers.set('x-remix-target', target)
+
+    let response = await fetch(src, {
+      credentials: 'same-origin',
+      headers,
+      signal,
+    })
+    return response.body ?? response.text()
+  },
+})
+```
+
+### Why this bridge is needed
+
+Server rendering and browser interactivity are two different runtimes:
+
+- **Server runtime** (`server.ts`, `router.fetch`, `render.tsx`) can render HTML and return responses.
+- **Browser runtime** must load modules, attach event handlers, and fetch frame updates.
+
+Without `entry.ts`, the browser gets HTML but has no instructions for:
+
+- how to load `clientEntry(...)` modules dynamically
+- how to request frame HTML updates with the right headers
+- how to preserve cookies/session for same-origin frame fetches
+- how to cancel in-flight requests when navigation state changes
+
+So `entry.ts` is the handshake layer: it connects server-rendered HTML to client behavior.
+
+### Practical examples
+
+#### Example A: Hydrating `PromptButton`
+
+`PromptButton` uses `clientEntry(...)`. When the page loads, Remix UI asks the client bridge to load the module export:
+
+```typescript
+let mod = await import(moduleUrl)
+return mod[exportName]
+```
+
+That is what turns static button HTML into a live, clickable component.
+
+#### Example B: Frame updates
+
+When a frame needs new content, Remix UI calls `resolveFrame(...)`. The bridge fetches HTML with:
+
+- `Accept: text/html`
+- optional `x-remix-target`
+- `credentials: 'same-origin'` (cookies included)
+
+This keeps auth/session behavior consistent with server-side rendering.
+
+### Rule of thumb
+
+- `render.tsx` answers: **"How do we render HTML on the server?"**
+- `entry.ts` answers: **"How does the browser continue from that HTML?"**
+
+You need both for a full server-first + selective-hydration flow.
+
+### Why `entry.ts` lives in `app/assets/`, not `app/utils/`
+
+`entry.ts` is browser runtime code, not a generic helper.
+
+- `app/assets/` is for code that is delivered to the browser as assets/modules.
+- `app/utils/` is for shared helper logic (typically reusable helpers, often server-side or cross-layer utilities).
+
+`entry.ts` is loaded from an asset URL (for example via `<script type="module" src={routes.assets.href(...)}>`), so its role is operationally an asset entrypoint, not a utility.
+
+---
+
 ### Registering Routes in `router.ts`
 
 ```typescript
@@ -252,7 +393,7 @@ Promote a flat file to a folder only when it genuinely needs it.
 
 ---
 
-## 5. Middleware & Server Setup
+## 7. Middleware & Server Setup
 
 Middleware is a function `(context, next) => Response`. It runs in order for every request.
 
@@ -397,7 +538,7 @@ The key difference: Node needs `createRequestListener` to bridge its `http` modu
 
 ---
 
-## 6. Data Access & Validation
+## 8. Data Access & Validation
 
 ### Defining Tables
 
@@ -531,7 +672,7 @@ let { slug, title } = parsed.value  // fully typed
 
 ---
 
-## 7. Auth & Sessions
+## 9. Auth & Sessions
 
 ### Sessions vs Plain Cookies
 
@@ -636,7 +777,7 @@ export function requireAuthRedirect() {
 
 ---
 
-## 8. The Component Model
+## 10. The Component Model
 
 > ⚠️ **Remix Component is not React.** Do not reach for hooks. The model is different.
 
@@ -947,9 +1088,195 @@ run(Counter, { label: 'Clicks', initialCount: 0 })
 
 **Server-rendered output is the default.** Don't add `clientEntry` before the server route is correct.
 
+### What Is a Client-Hydrated Island?
+
+A **client-hydrated island** is a small, isolated part of a page that gets browser JavaScript attached after the server already rendered HTML.
+
+Think of the page in two layers:
+
+1. **Server-rendered shell**: HTML arrives fast, readable by default.
+2. **Hydrated islands**: only selected components "wake up" and become interactive.
+
+This lets you keep most of the page lightweight while still adding rich behavior where needed.
+
+#### Example 1: Static content (no island needed)
+
+If a component only renders text/markup and does not use browser APIs or events, keep it server-only:
+
+```tsx
+function AboutBlurb() {
+  return () => (
+    <section>
+      <h2>About</h2>
+      <p>This section is static and needs no browser JavaScript.</p>
+    </section>
+  )
+}
+```
+
+No `clientEntry`, no hydration, minimal JS.
+
+#### Example 2: Interactive button (island needed)
+
+Your `PromptButton` needs browser APIs (`navigator.clipboard`) and click behavior, so it becomes a client island:
+
+```tsx
+export const PromptButton = clientEntry(
+  '/assets/app/ui/prompt-button.tsx#PromptButton',
+  function PromptButton(handle: Handle<{ text: string }>) {
+    let copied = false
+
+    return () => (
+      <button
+        mix={on('click', async () => {
+          await navigator.clipboard.writeText(handle.props.text)
+          copied = true
+          handle.update()
+        })}
+      >
+        {copied ? 'Copied!' : handle.props.text}
+      </button>
+    )
+  },
+)
+```
+
+Only this component is hydrated; the rest of the page can remain server-rendered.
+
+#### Example 3: Same page, mixed strategy
+
+A docs page can stay mostly static:
+
+- Header, nav, article body: server-only
+- "Copy code" button or live demo widget: client-hydrated islands
+
+That mixed approach is usually the sweet spot.
+
+#### Quick Rule of Thumb
+
+Use `clientEntry` when the component needs one of these:
+
+- Browser-only APIs (`window`, `document`, `navigator`, clipboard, localStorage)
+- User-driven interactivity (click handlers, local UI state, optimistic feedback)
+- Async client-side tasks that update UI after mount
+
+Keep it server-only when it is just content/layout.
+
+## 11. Reference UI Structure
+
+This reference app uses a simple layered UI structure. Understanding who owns what prevents duplicated markup and keeps route files small.
+
+### The layers and their responsibilities
+
+| Layer | File(s) in this app | Responsibility |
+|---|---|---|
+| **Document** | `app/ui/document.tsx` | Global HTML shell (`<html>`, `<head>`, `<body>`), page `<title>`, client entry script |
+| **Layout** | `app/ui/layout.tsx` | Shared app chrome (header, nav, `<main>` wrapper) used by multiple pages |
+| **Page** | `app/controllers/*.tsx` and `app/ui/scaffold-home-page.tsx` | Route-owned content and page-specific composition |
+| **Button / Interactive leaf** | `app/ui/prompt-button.tsx` | Small client-hydrated interactive unit (`clientEntry`, click handlers, local UI state) |
+
+### 1) `Document`: the outer HTML contract
+
+`Document` is responsible for the true HTML document shell:
+
+- `<html lang="en">`
+- `<head>` metadata and `<title>`
+- `<body>` wrapper
+- loading browser runtime via the `entry.ts` script
+
+Use `Document` for app-wide shell concerns, not route-specific content.
+
+### 2) `Layout`: shared page chrome
+
+`Layout` sits inside `Document` and gives pages a consistent frame:
+
+- top navigation links (`Home`, `About`, `Auth`)
+- shared `<main>` region
+- optional page title passed down to `Document`
+
+If multiple routes need the same header/footer/navigation, put it here rather than repeating in controllers.
+
+### 3) `Page`: route-owned content
+
+Pages belong to the route controller (or route-owned page module):
+
+- `home` route currently renders `HomePage` from `app/ui/scaffold-home-page.tsx`
+- `about` route renders `AboutPage`
+- `auth` route renders `AuthPage`
+
+This layer owns route-specific text, sections, forms, and composition decisions.
+
+### 4) `Button`: interactive leaf component
+
+`PromptButton` is a leaf interactive component:
+
+- declared with `clientEntry(...)`
+- uses browser APIs (`navigator.clipboard`)
+- owns small local UI state (`idle`, `copied`, etc.)
+- calls `handle.update()` to rerender itself
+
+Keep interactivity as low in the tree as possible: hydrate the button, not the whole page.
+
+### End-to-end flow in the reference app
+
+1. Route handler (`app/controllers/about.tsx`) receives request
+2. Controller returns `render(<AboutPage />, request)`
+3. `AboutPage` renders inside `<Layout ...>`
+4. `Layout` renders inside `<Document ...>`
+5. `Document` includes `<script type="module" ...entry.ts>`
+6. Browser loads `entry.ts`; interactive leaves (like `PromptButton`) hydrate
+
+### Practical placement rules
+
+- **Put in `Document`**: global HTML shell, app-wide script includes, baseline metadata.
+- **Put in `Layout`**: shared chrome used across routes.
+- **Put in Page**: route-specific content and composition.
+- **Put in leaf UI (`app/ui/*`)**: reusable visual units; only use `clientEntry` when interactivity is required.
+
+### How to refactor when a Page gets too big
+
+When a page file starts becoming hard to scan (large JSX blocks, mixed concerns, repeated sections), split by ownership:
+
+1. Keep the route handler in the controller file (`handler({ request }) { ... }`).
+2. Extract route-specific view modules next to that route (same controller folder or route-owned files).
+3. Move truly shared UI primitives to `app/ui/`.
+4. Keep browser-only interactive pieces as leaf `clientEntry` components.
+
+#### A practical split pattern
+
+**Before** (single large file):
+
+- `app/controllers/about.tsx` contains handler + all sections + interactive button logic
+
+**After** (clear ownership):
+
+- `app/controllers/about.tsx` — route handler + top-level page composition only
+- `app/controllers/about/sections/mission.tsx` — route-owned section
+- `app/controllers/about/sections/team.tsx` — route-owned section
+- `app/ui/prompt-button.tsx` — shared interactive leaf used in multiple pages
+
+#### Promotion rule (route-owned -> shared)
+
+Start narrow. Keep modules route-owned until they are reused by another route with the same semantics. Then promote to `app/ui/`.
+
+If names become generic ("Card", "List", "Panel"), that is usually a sign it may belong in shared UI. If names stay route-specific ("AboutMission", "PricingHero"), keep them route-owned.
+
+### Caveat: why both `Document` and `HomePage` may contain `<head>`
+
+In this reference app, two patterns are currently mixed:
+
+- `app/ui/document.tsx` defines the shared document shell (`<html>`, `<head>`, `<body>`)
+- `app/ui/scaffold-home-page.tsx` is a self-contained starter page that also returns a full document shell
+
+That means the home route can look different from `about`/`auth`, which use `Layout -> Document`.
+
+This is scaffold convenience, not the ideal long-term shape. The starter home file is designed to be replaced as you build your own page structure.
+
+**Recommended direction:** keep document-level concerns in `Document`, and make route pages render content inside `Layout` (instead of returning their own `<html>/<head>/<body>`).
+
 ---
 
-## 9. Testing
+## 12. Testing
 
 ### The Two Test Shapes
 
@@ -1020,7 +1347,7 @@ Run tests: `remix test` | With coverage: `remix test --coverage`
 
 ---
 
-## 10. Common Mistakes to Avoid
+## 13. Common Mistakes to Avoid
 
 | ❌ Mistake | ✅ Fix |
 |---|---|
@@ -1039,7 +1366,7 @@ Run tests: `remix test` | With coverage: `remix test --coverage`
 
 ---
 
-## 11. Static Sites with Remix
+## 14. Static Sites with Remix
 
 Remix is server-first, but nothing stops you from pre-rendering routes to plain HTML files at build time and serving them from a CDN or static host (Nginx, GitHub Pages, Netlify, etc.). The approach is straightforward: spin up the router, fetch each route as if it were a real request, and write the response body to disk.
 
@@ -1150,7 +1477,7 @@ await Promise.all(allBooks.map(book =>
 
 ---
 
-## 12. Error Handling Patterns
+## 15. Error Handling Patterns
 
 Remix actions should treat expected business outcomes as return values, not exceptions.
 
@@ -1186,7 +1513,7 @@ Log unexpected failures in one place (your `server.ts` catch block), then return
 
 ---
 
-## 13. Production Readiness Checklist
+## 16. Production Readiness Checklist
 
 Before shipping, verify:
 
@@ -1202,7 +1529,7 @@ Before shipping, verify:
 
 ---
 
-## 14. Quick Package Reference
+## 17. Quick Package Reference
 
 ### Routing & Server
 | Package | Use for |

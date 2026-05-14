@@ -1,0 +1,11 @@
+{
+    "lessonName": "Lesson One",
+    "lessonTitle": "Creative Writing",
+    "lessonDescription": "This lesson helps students write a story about a cat caught in the rain and finding shelter.\nThey will learn to describe the setting, characters, and emotions involved in the story.\nYou will guide them through the process of brainstorming ideas, organizing their thoughts, and writing a coherent narrative.",
+    "lessonKey": null,
+    "lessonStyleInstruction": "You are a illustrator for a children's book.\nThe target persona is a boy or girl aged between 4 and 8 years old.\nThe lighting is form all directions, creating a happy and childlike landscape.\nKeep the background in focus, and of the same style as the foreground object.\nUse bright colors and clear shapes to capture the attention of young readers.\nDo not illustrate any words, signs or speech bubbles unless specifically asked for in the <drawing-depiction>.\nThr illustration is to fill the complete drawing area.\nDo not make any illustration with rounded edges, the completed illustration should be a rectangle.\nDo not draw any frame, boundary or any decoration around the image.\nEach illustration should be lively and expressive, conveying the emotions and actions of the characters clearly.\nThe illustrations should be colorful, engaging, and simple enough for young children to understand.\nEnsure that the illustrations complement the text and help to tell the story visually.",
+    "studentNames": [],
+    "starterText": "The cat sat on the mat, beside the fireplace. The storm raged outside, wind and heavy rain.",
+    "lessonStartsAt": null,
+    "lessonDuration": 60
+}

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
-    "types": ["node"],
+    "types": ["node", "bun-types"],
     "module": "ES2022",
     "moduleResolution": "Bundler",
     "target": "ESNext",
@@ -12,7 +12,10 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "jsxImportSource": "remix/ui",
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./app/*"]
+    }
   },
   "exclude": ["dist"]
 }

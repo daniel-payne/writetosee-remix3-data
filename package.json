@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch server.ts",
-    "start": "tsx server.ts",
-    "test": "tsx --test",
+    "dev": "bun --hot server.ts",
+    "start": "bun server.ts",
+    "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "latest",
+    "bun-types": "^1.3.14",
     "typescript": "latest"
   }
 }
