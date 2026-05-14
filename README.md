@@ -1,4 +1,4 @@
-# My Remix App
+# Writetosee Remix3 Data
 
 A minimal Remix application starter with a home page and an auth page.
 
