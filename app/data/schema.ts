@@ -40,8 +40,10 @@ export const studentTable = table({
   columns: {
     studentId:   c.integer().primaryKey(),
     studentCode: c.text(),
+    classCode:   c.text(),
     tutorId:     c.integer().notNull(),
     lessonId:    c.integer().notNull(),
+    manuscript:  c.text(),
     data:        c.text().notNull().default('{}'),
     isActive:    c.integer().notNull().default(1),
     updatedAt:  c.text().notNull().default(''), // TIMESTAMP
@@ -49,4 +51,31 @@ export const studentTable = table({
 })
 
 export type Student = TableRow<typeof studentTable>
+
+export const manuscriptTable = table({
+  name: 'manuscript',
+  primaryKey: 'manuscriptId',
+  columns: {
+    manuscriptId: c.integer().primaryKey(),
+    studentId:    c.integer().notNull(),
+    manuscript:   c.text(),
+  },
+})
+
+export type Manuscript = TableRow<typeof manuscriptTable>
+
+export const panelTable = table({
+  name: 'panel',
+  primaryKey: 'panelId',
+  columns: {
+    panelId:      c.integer().primaryKey(),
+    manuscriptId: c.integer().notNull(),
+    panelNo:      c.integer().notNull(),
+    data:         c.text().notNull().default('{}'),
+    isActive:     c.integer().notNull().default(1),
+    updatedAt:    c.text().notNull().default(''), // TIMESTAMP
+  },
+})
+
+export type Panel = TableRow<typeof panelTable>
 

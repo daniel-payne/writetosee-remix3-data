@@ -42,7 +42,7 @@ export const addLesson: BuildAction<'POST', typeof routes.addLesson> = {
     return Response.json({
       success: true,
       message: 'Lesson added',
-      data: formatData(lesson)
+      data: formatData({ ...lesson, students: [] })
     })
   }
 }

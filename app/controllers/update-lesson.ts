@@ -1,7 +1,7 @@
 import type { BuildAction } from 'remix/fetch-router'
 import { routes } from '@/routes'
 import { Database } from 'remix/data-table'
-import { lessonTable } from '@/data/schema'
+import { lessonTable, studentTable } from '@/data/schema'
 import { requireSession, TutorId } from '@/middleware/requireSession'
 import { coordinateStudents } from '@/processes/coordinateStudents'
 
@@ -53,13 +53,14 @@ export const updateLesson: BuildAction<'POST', typeof routes.updateLesson> = {
       console.error('Coordinate students error:', err)
     }
 
-    // Return the updated lesson in the same format as add-lesson
+    // Return the updated lesson along with its students
     const updatedLesson = await db.findOne(lessonTable, { where: { lessonId: lesson.lessonId } })
+    const students = await db.findMany(studentTable, { where: { lessonId: lesson.lessonId } })
 
     return Response.json({
       success: true,
       message: 'Lesson updated',
-      data: formatData(updatedLesson)
+      data: formatData({ ...updatedLesson, students })
     })
   }
 }

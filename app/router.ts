@@ -9,6 +9,7 @@ import { closeSession } from '@/controllers/close-session'
 import { deactivateClass } from '@/controllers/deactivate-class'
 import { openSession } from '@/controllers/open-session'
 import { removeLesson } from '@/controllers/remove-lesson'
+import { retrieveClass } from '@/controllers/retrieve-class'
 import { retrieveLessons } from '@/controllers/retrieve-lessons'
 import { updateLesson } from '@/controllers/update-lesson'
 import { routes } from '@/routes'
@@ -27,3 +28,4 @@ router.map(routes.removeLesson, removeLesson)
 router.map(routes.activateClass, activateClass)
 router.map(routes.deactivateClass, deactivateClass)
 router.map(routes.retrieveLessons, retrieveLessons)
+router.map(routes.retrieveClass, retrieveClass)

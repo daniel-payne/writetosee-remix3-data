@@ -23,13 +23,17 @@ export async function coordinateStudents(db: Database, lessonCode: string, stude
   for (const name of studentNames) {
     if (existingMap.has(name)) {
       const student = existingMap.get(name)
-      if (student.isActive === 0) {
-        await db.update(studentTable, student.studentId, { isActive: 1 })
+      if (student.isActive === 0 || student.classCode !== lesson.lessonCode) {
+        await db.update(studentTable, student.studentId, { 
+          isActive: 1,
+          classCode: lesson.lessonCode
+        })
       }
     } else {
       await db.create(studentTable, {
         tutorId: lesson.tutorId,
         lessonId: lesson.lessonId,
+        classCode: lesson.lessonCode,
         data: JSON.stringify({ name }),
         isActive: 1
       })

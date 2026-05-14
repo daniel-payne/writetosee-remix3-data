@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "bun --hot server.ts",
     "start": "bun server.ts",
-    "test": "bun test",
+    "test": "bun test/run.ts",
+    "test:api": "bun test/run.ts",
+    "test:watch": "bun test/watch.ts",
     "typecheck": "tsc --noEmit"
   },
   "engines": {

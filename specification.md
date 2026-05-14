@@ -48,7 +48,9 @@ CREATE TABLE IF NOT EXISTS student (
   tutorId        INTEGER        NOT NULL,
   lessonId       INTEGER        NOT NULL,
 
-  data           jsonb          NOT NULL        DEFAULT '{}',
+  manuscript     TEXT           NULL,
+
+  data           jsonb          NOT NULL DEFAULT '{}',
   isActive       INTEGER        NOT NULL DEFAULT 1,
   
   updatedAt      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -57,6 +59,36 @@ CREATE TABLE IF NOT EXISTS student (
   FOREIGN KEY(lessonId) REFERENCES lesson(lessonId) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_student_tutorId ON student(tutorId);
+CREATE INDEX IF NOT EXISTS idx_student_lessonId ON student(lessonId); 
 
+-- MANUSCRIPT ---------------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS manuscript (
+  manuscriptId   INTEGER        PRIMARY KEY,
+
+  studentId      INTEGER        NOT NULL,
+
+  manuscript     TEXT           NULL,
+
+  FOREIGN KEY(studentId) REFERENCES student(studentId) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_manuscript_studentId ON manuscript(studentId);
+
+-- PANEL ---------------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS panel (
+  panelId        INTEGER        PRIMARY KEY,
+
+  manuscriptId   INTEGER        NOT NULL,
+
+  panelNo        INTEGER        NOT NULL,
+
+  data           jsonb          NOT NULL        DEFAULT '{}',
+  isActive       INTEGER        NOT NULL DEFAULT 1,
+  
+  updatedAt      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+
+  FOREIGN KEY(manuscriptId) REFERENCES manuscript(manuscriptId) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_panel_manuscriptId ON panel(manuscriptId);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_panel_manuscriptId_panelNo ON panel(manuscriptId, panelNo);
 
 ```
